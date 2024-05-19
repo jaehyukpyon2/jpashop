@@ -93,4 +93,61 @@ class OrderServiceTest {
         em.persist(member);
         return member;
     }
+
+    @Test
+    public void proxy_테스트() throws Exception {
+        Member member = new Member();
+        member.setName("member 1");
+        em.persist(member);
+
+        em.flush();
+        em.clear();
+
+        Member referenceMember = em.getReference(Member.class, member.getId()); // select query X
+        System.out.println("---------------------------------------");
+        Member findMember = em.find(Member.class, member.getId()); // 여기에서 member select query 실행
+        System.out.println("referenceMember == findMember ? " + (referenceMember == findMember)); // true
+        System.out.println("findMember.getClass() ? " + findMember.getClass()); // proxy!
+    }
+
+    @Test
+    public void proxy_테스트2() throws Exception {
+        Member member = new Member();
+        member.setName("member 1");
+        em.persist(member);
+
+        em.flush();
+        em.clear();
+
+        Member referenceMember = em.getReference(Member.class, member.getId()); // select query X
+        System.out.println("---------------------------------------");
+
+        Member findMember = em.createQuery("select m from Member m", Member.class).getResultList().get(0);
+
+        System.out.println("referenceMember == findMember ? " + (referenceMember == findMember)); // true
+        System.out.println("findMember.getClass() ? " + findMember.getClass()); // proxy!
+        System.out.println(referenceMember.getName() + ", " + referenceMember.getId()); // "member 1", 1
+    }
+
+    @Test
+    public void proxy_테스트3() throws Exception {
+        Member member = new Member();
+        member.setId(1L);
+        member.setName("member1");
+        em.persist(member);
+
+        em.flush();
+        em.clear();
+
+        Member newPersistMember = new Member();
+        newPersistMember.setId(1L);
+        member.setName("newPersistMember");
+        em.persist(newPersistMember);
+
+        Member findMember = em.createQuery("select m from Member m where m.id = 1", Member.class)
+                .getResultList().get(0);
+        // primary key violation exception => jpql이 실행되기 전에 영속성 캐시를 flush하는데, 1L이 중복이라서...
+
+        System.out.println("member == newPersistMember ? " + (newPersistMember == findMember));
+    }
 }
