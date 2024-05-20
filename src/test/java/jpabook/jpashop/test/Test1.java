@@ -27,7 +27,7 @@ public class Test1 {
         em.persist(c);
 
         a.setB(b);
-        b.setC(c);
+//        b.setC(c);
         
         em.flush();
         em.clear();
@@ -91,7 +91,7 @@ public class Test1 {
         em.persist(d);
 
         a.setB(b);
-        b.setC(c);
+        //b.setC(c);
         c.setD(d);
 
         em.flush();
@@ -122,5 +122,47 @@ public class Test1 {
         where
             b1_0.id=?
         **/
+    }
+
+    @Test
+    public void fk_pk_test() throws Exception {
+        B b1 = new B();
+        em.persist(b1);
+
+        em.flush();
+        em.clear();
+
+        B b2 = new B();
+        b2.setId(1L);
+        A a1 = new A();
+        a1.setB(b2);
+        em.persist(a1);
+    }
+
+    @Test
+    public void batch_size_test() throws Exception {
+        A a1 = new A();
+        B b1 = new B();
+        a1.setB(b1);
+        em.persist(a1);
+        em.persist(b1);
+
+        A a2 = new A();
+        B b2 = new B();
+        a2.setB(b2);
+        em.persist(a2);
+        em.persist(b2);
+
+        em.flush();
+        em.clear();
+
+        A findA1 = em.find(A.class, a1.getId());
+        A findA2 = em.find(A.class, a2.getId());
+
+        findA1.getB().getName();
+        System.out.println("-------------------------");
+        findA2.getB().getName();
+        // batch size 설정으로 인해 in query 로 한 번에 조회해와서
+        // findA2.getB().getName() 을 호출할때는 따로 select query가 실행되지 않는다.
     }
 }

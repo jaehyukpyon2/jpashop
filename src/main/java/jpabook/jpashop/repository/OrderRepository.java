@@ -23,9 +23,10 @@ public class OrderRepository {
     }
 
     public List<Order> findAll(OrderSearch orderSearch) {
-        List<Order> resultList = em.createQuery("select o from Order o join o.member m" +
-                        " where o.status = :status" +
-                        " and m.name like :name", Order.class)
+        List<Order> resultList = em.createQuery(
+                        "select o from Order o join o.member m" +
+                                " where o.status = :status" +
+                                " and m.name like :name", Order.class)
                 .setParameter("status", orderSearch.getOrderStatus())
                 .setParameter("name", orderSearch.getMemberName())
                 .getResultList();
@@ -83,12 +84,24 @@ public class OrderRepository {
 
     public List<Order> findAllWithItem() {
         return em.createQuery(
-                "select distinct o from Order o" +
-                        " join fetch o.member m" +
-                        " join fetch o.delivery d" +
-                        " join fetch o.orderItems oi" +
-                        " join fetch oi.item i", Order.class
-                )
+                        "select distinct o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d" +
+                                " join fetch o.orderItems oi" +
+                                " join fetch oi.item i", Order.class
+                ) // 1 : N 은 페이징 불가능 !!!!!!!!!!!!!
                 .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        List<Order> resultList = em.createQuery(
+                        "select o from Order o" +
+                                " join fetch o.member m" +
+                                " join fetch o.delivery d", Order.class
+                )
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList(); // Query 한 번 실행
+        return resultList;
     }
 }

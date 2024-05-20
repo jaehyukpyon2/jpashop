@@ -59,6 +59,16 @@ public class OrderApiController {
         return collect;
     }
 
+    @GetMapping(value = {"/api/v3.1/orders"})
+    public List<OrderDto> orderV3_page() {
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        System.out.println("orders.size() = " + orders.size());
+        List<OrderDto> collect = orders.stream()
+                .map(o -> new OrderDto(o))
+                .collect(Collectors.toList());
+        return collect;
+    }
+
     @Data
     static class OrderDto {
         private Long orderId;
