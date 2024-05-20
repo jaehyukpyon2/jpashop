@@ -1,0 +1,12 @@
+영속성 컨텍스트는 DB 커넥션 물고있다.
+DB 트랜젝션 시작할 때 영속성 컨텍스트가 DB 커넥션을 갖고온다. (서비스 계층에서 트랜젝션 시작할 때 커넥션 갖고온다.)
+DB 커넥션 획득하고 언제 돌려주냐? -> 여기서 차이난다.
+- OSIV가 켜져있다면, 서비스 계층 메서드에서 @Transactional 끝나도 커넥션 반환 안 한다.
+    영속성 컨텍스트가 DB 커넥션 물고 살아있어서 Controller에서 Lazy Loading할 수 있었던 것.
+    (영속성 컨텍스트와 DB 커넥션이 User에게 최종 Response가 나갈때까지 끝까지 살아있다.)
+    --> 즉, Controller , View Template에서도 Lazy Loading 가능.
+
+- OSIV가 꺼져있다면, Transaction 끝나면 영속성 컨텍스트 날라가고 DB 커넥션 return.
+
+지연 로딩 하려면 영속성 컨텍스트가 살아있어야 한다.
+OSIV를 끄면 지연 로딩을 모두 Transaction 안에서 처리해야 한다.
